@@ -82,19 +82,28 @@ app.MapPost("/connect/token", async (HttpContext context, IOpenIddictApplication
     // will be used to create an id_token, a token or a code.
     var identity = new ClaimsIdentity(TokenValidationParameters.DefaultAuthenticationType, Claims.Name, Claims.Role);
 
-    // Use the client_id as the subject identifier.
-    var clientId = await applicationManager.GetClientIdAsync(application);
-    identity.AddClaim(Claims.Subject, clientId);
-
-    var name = await applicationManager.GetDisplayNameAsync(application);
-    identity.AddClaim(Claims.Name, name);
-    //identity.SetDestinations(new[] { Destinations.AccessToken, Destinations.IdentityToken });
+    // Use the client_id as the subject identifier.   
+    identity.AddClaim(Claims.Subject, await applicationManager.GetClientIdAsync(application));
+    identity.AddClaim(Claims.Name, await applicationManager.GetDisplayNameAsync(application));
+    identity.SetDestinations(GetDestinations);
 
     return Results.SignIn(
         principal: new ClaimsPrincipal(identity),
         properties: null,
         authenticationScheme: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
 });
+
+static IEnumerable<string> GetDestinations(Claim claim)
+{
+    // Note: by default, claims are NOT automatically included in the access and identity tokens.
+    // To allow OpenIddict to serialize them, you must attach them a destination, that specifies
+    // whether they should be included in access tokens, in identity tokens or in both.
+    return claim.Type switch
+    {
+        Claims.Name or Claims.Email or Claims.Role => new[] { Destinations.AccessToken, Destinations.IdentityToken },
+        _ => new[] { Destinations.AccessToken }
+    };
+}
 
 app.UseAuthentication();
 app.UseAuthorization();
