@@ -1,20 +1,19 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Aixasz.OpenIddict.Server.Models;
+using Microsoft.AspNetCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
 using System.Security.Claims;
-using Microsoft.AspNetCore;
-using OpenIddict.Abstractions;
-using Aixasz.OpenIddict.Server.Models;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
-    // Configure Entity Framework Core to use Microsoft SQL Server.
-    options.UseSqlServer(connectionString);
+    // Configure Entity Framework Core to use Microsoft Sqlite.
+    options.UseSqlite(connectionString);
 
     // Register the entity sets needed by OpenIddict.
     // Note: use the generic overload if you need to replace the default OpenIddict entities.
@@ -51,7 +50,6 @@ builder.Services.AddOpenIddict()
             // Register the ASP.NET Core host and configure the ASP.NET Core options.
             options.UseAspNetCore()
                    .EnableTokenEndpointPassthrough();
-
         })
 
         // Register the OpenIddict validation components.
@@ -90,7 +88,7 @@ app.MapPost("/connect/token", async (HttpContext context, IOpenIddictApplication
     // will be used to create an id_token, a token or a code.
     var identity = new ClaimsIdentity(TokenValidationParameters.DefaultAuthenticationType, Claims.Name, Claims.Role);
 
-    // Use the client_id as the subject identifier.   
+    // Use the client_id as the subject identifier.
     identity.AddClaim(Claims.Subject, await applicationManager.GetClientIdAsync(application));
     identity.AddClaim(Claims.Name, await applicationManager.GetDisplayNameAsync(application));
     identity.SetDestinations(GetDestinations);
