@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace SampleOpenIddict.Models;
+namespace Aixasz.OpenIddict.Server.Models;
 
 public class ApplicationDbContext : IdentityDbContext
 {

@@ -1,11 +1,11 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using OpenIddict.Server.AspNetCore;
-using SampleOpenIddict.Models;
-using static OpenIddict.Abstractions.OpenIddictConstants;
 using System.Security.Claims;
 using Microsoft.AspNetCore;
 using OpenIddict.Abstractions;
+using Aixasz.OpenIddict.Server.Models;
+using static OpenIddict.Abstractions.OpenIddictConstants;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,7 +27,7 @@ builder.Services.AddOpenIddict()
         .AddCore(options =>
         {
             // Configure OpenIddict to use the Entity Framework Core stores and models.
-            // Note: call ReplaceDefaultEntities() to replace the default entities.
+            // Note: call ReplaceDefaultEntities() to replace the dฺefault entities.
             options.UseEntityFrameworkCore()
                    .UseDbContext<ApplicationDbContext>();
         })
@@ -39,15 +39,19 @@ builder.Services.AddOpenIddict()
             options.SetTokenEndpointUris("connect/token");
 
             // Enable the client credentials flow.
-            options.AllowClientCredentialsFlow();
+            options.AllowClientCredentialsFlow()
+                   .AllowRefreshTokenFlow();
 
             // Register the signing and encryption credentials.
             options.AddDevelopmentEncryptionCertificate()
                    .AddDevelopmentSigningCertificate();
 
+            options.RegisterScopes("api");
+
             // Register the ASP.NET Core host and configure the ASP.NET Core options.
             options.UseAspNetCore()
                    .EnableTokenEndpointPassthrough();
+
         })
 
         // Register the OpenIddict validation components.
@@ -60,7 +64,11 @@ builder.Services.AddOpenIddict()
             options.UseAspNetCore();
         });
 
-builder.Services.AddOpenIddict();
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = Schemes.Bearer;
+    options.DefaultChallengeScheme = Schemes.Bearer;
+});
 
 var app = builder.Build();
 
