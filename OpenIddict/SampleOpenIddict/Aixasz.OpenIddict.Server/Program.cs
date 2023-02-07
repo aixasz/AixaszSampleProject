@@ -1,10 +1,8 @@
-﻿using Aixasz.OpenIddict.Server.Models;
-using Microsoft.AspNetCore;
+﻿using Aixasz.OpenIddict.Server.Endpoints;
+using Aixasz.OpenIddict.Server.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using OpenIddict.Abstractions;
-using OpenIddict.Server.AspNetCore;
-using System.Security.Claims;
+using OpenIddict.Validation.AspNetCore;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,7 +24,7 @@ builder.Services.AddOpenIddict()
         .AddCore(options =>
         {
             // Configure OpenIddict to use the Entity Framework Core stores and models.
-            // Note: call ReplaceDefaultEntities() to replace the dฺefault entities.
+            // Note: call ReplaceDefaultEntities() to replace the default entities.
             options.UseEntityFrameworkCore()
                    .UseDbContext<ApplicationDbContext>();
         })
@@ -38,8 +36,7 @@ builder.Services.AddOpenIddict()
             options.SetTokenEndpointUris("connect/token");
 
             // Enable the client credentials flow.
-            options.AllowClientCredentialsFlow()
-                   .AllowRefreshTokenFlow();
+            options.AllowClientCredentialsFlow();
 
             // Register the signing and encryption credentials.
             options.AddDevelopmentEncryptionCertificate()
@@ -62,56 +59,52 @@ builder.Services.AddOpenIddict()
             options.UseAspNetCore();
         });
 
-builder.Services.AddAuthentication(options =>
+builder.Services.AddAuthentication().AddJwtBearer();
+
+builder.Services.AddAuthorization(options =>
 {
-    options.DefaultScheme = Schemes.Bearer;
-    options.DefaultChallengeScheme = Schemes.Bearer;
+    options.AddPolicy("ClientCredentialsPolicy", policy => policy
+                .RequireAuthenticatedUser()
+                .RequireClaim(Claims.Scope, "api")
+                .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme));
 });
+
+builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-app.MapPost("/connect/token", async (HttpContext context, IOpenIddictApplicationManager applicationManager) =>
+await SeedClientCredentials(app.Services);
+
+static async Task SeedClientCredentials(IServiceProvider serviceProvider)
 {
-    var request = context.GetOpenIddictServerRequest();
-    if (!request.IsClientCredentialsGrantType())
+    using var scope = serviceProvider.CreateScope();
+
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    await context.Database.EnsureCreatedAsync();
+
+    var manager = scope.ServiceProvider.GetRequiredService<IOpenIddictApplicationManager>();
+
+    var client = await manager.FindByClientIdAsync("aixasz-client");
+    if (client is null)
     {
-        throw new NotImplementedException("The specified grant is not implemented.");
+        await manager.CreateAsync(new OpenIddictApplicationDescriptor
+        {
+            ClientId = "aixasz-client",
+            ClientSecret = "f128d22c-412d-469e-94c0-e1eb366e7f1b",
+            DisplayName = "Aixasz Sample OpenIddict ClientCredentials",
+            Permissions =
+            {
+                Permissions.Endpoints.Token,
+                Permissions.GrantTypes.ClientCredentials
+            }
+        });
     }
-
-    // Note: the client credentials are automatically validated by OpenIddict:
-    // if client_id or client_secret are invalid, this action won't be invoked.
-
-    var application = await applicationManager.FindByClientIdAsync(request.ClientId) ??
-        throw new InvalidOperationException("The application cannot be found.");
-
-    // Create a new ClaimsIdentity containing the claims that
-    // will be used to create an id_token, a token or a code.
-    var identity = new ClaimsIdentity(TokenValidationParameters.DefaultAuthenticationType, Claims.Name, Claims.Role);
-
-    // Use the client_id as the subject identifier.
-    identity.AddClaim(Claims.Subject, await applicationManager.GetClientIdAsync(application));
-    identity.AddClaim(Claims.Name, await applicationManager.GetDisplayNameAsync(application));
-    identity.SetDestinations(GetDestinations);
-
-    return Results.SignIn(
-        principal: new ClaimsPrincipal(identity),
-        properties: null,
-        authenticationScheme: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
-});
-
-static IEnumerable<string> GetDestinations(Claim claim)
-{
-    // Note: by default, claims are NOT automatically included in the access and identity tokens.
-    // To allow OpenIddict to serialize them, you must attach them a destination, that specifies
-    // whether they should be included in access tokens, in identity tokens or in both.
-    return claim.Type switch
-    {
-        Claims.Name or Claims.Email or Claims.Role => new[] { Destinations.AccessToken, Destinations.IdentityToken },
-        _ => new[] { Destinations.AccessToken }
-    };
 }
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.AddAuthorizeEndpoint();
+app.AddApiEndpoint();
 
 app.Run();
