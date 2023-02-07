@@ -63,10 +63,12 @@ builder.Services.AddAuthentication().AddJwtBearer();
 
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("ClientCredentialsPolicy", policy => policy
-                .RequireAuthenticatedUser()
-                .RequireClaim(Claims.Scope, "api")
-                .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme));
+    options.AddPolicy(
+        "ClientCredentialsPolicy",
+        policy => policy
+            .RequireAuthenticatedUser()
+            .RequireClaim(Claims.Scope, "api")
+            .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme));
 });
 
 builder.Services.AddControllersWithViews();
