@@ -1,8 +1,9 @@
+using Aixasz.OpenIddict.ClientCredentials;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OpenIddict.Validation.AspNetCore;
 
-namespace Aixasz.OpenIddict.Server.Controllers;
+namespace Aixasz.OpenIddict.ClientCredentials.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

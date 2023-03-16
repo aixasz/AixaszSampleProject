@@ -5,7 +5,7 @@ using OpenIddict.Server.AspNetCore;
 using System.Security.Claims;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
-namespace Aixasz.OpenIddict.Server.Endpoints;
+namespace Aixasz.OpenIddict.ClientCredentials.Endpoints;
 
 public static class AuthorizeEndpoint
 {

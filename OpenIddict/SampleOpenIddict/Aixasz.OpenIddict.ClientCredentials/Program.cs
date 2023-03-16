@@ -1,5 +1,5 @@
-﻿using Aixasz.OpenIddict.Server.Endpoints;
-using Aixasz.OpenIddict.Server.Models;
+﻿using Aixasz.OpenIddict.ClientCredentials.Endpoints;
+using Aixasz.OpenIddict.ClientCredentials.Models;
 using Microsoft.EntityFrameworkCore;
 using OpenIddict.Abstractions;
 using OpenIddict.Validation.AspNetCore;

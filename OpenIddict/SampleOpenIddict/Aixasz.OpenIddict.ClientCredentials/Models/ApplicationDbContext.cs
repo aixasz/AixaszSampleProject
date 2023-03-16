@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace Aixasz.OpenIddict.Server.Models;
+namespace Aixasz.OpenIddict.ClientCredentials.Models;
 
 public class ApplicationDbContext : DbContext
 {

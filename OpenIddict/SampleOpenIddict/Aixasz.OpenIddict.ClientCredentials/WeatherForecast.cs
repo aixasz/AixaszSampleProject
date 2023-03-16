@@ -1,4 +1,4 @@
-namespace Aixasz.OpenIddict.Server;
+namespace Aixasz.OpenIddict.ClientCredentials;
 
 public class WeatherForecast
 {

@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aixasz.OpenIddict.Server", "Aixasz.OpenIddict.Server\Aixasz.OpenIddict.Server.csproj", "{FDC5727D-22BB-4DC6-B2BE-6E7318798A97}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aixasz.OpenIddict.ClientCredentials", "Aixasz.OpenIddict.ClientCredentials\Aixasz.OpenIddict.ClientCredentials.csproj", "{FDC5727D-22BB-4DC6-B2BE-6E7318798A97}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aixasz.OpenIddict.Password", "Aixasz.OpenIddict.Password\Aixasz.OpenIddict.Password.csproj", "{DBBA8139-31BC-4FE8-906D-3D16433A3B4A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{FDC5727D-22BB-4DC6-B2BE-6E7318798A97}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FDC5727D-22BB-4DC6-B2BE-6E7318798A97}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FDC5727D-22BB-4DC6-B2BE-6E7318798A97}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DBBA8139-31BC-4FE8-906D-3D16433A3B4A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DBBA8139-31BC-4FE8-906D-3D16433A3B4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DBBA8139-31BC-4FE8-906D-3D16433A3B4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DBBA8139-31BC-4FE8-906D-3D16433A3B4A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

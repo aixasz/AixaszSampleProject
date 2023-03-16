@@ -1,8 +1,8 @@
-﻿using Aixasz.OpenIddict.Server.Models;
+﻿using Aixasz.OpenIddict.ClientCredentials.Models;
 using OpenIddict.Abstractions;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
-namespace Aixasz.OpenIddict.Server;
+namespace Aixasz.OpenIddict.ClientCredentials;
 
 public class Worker : IHostedService
 {
