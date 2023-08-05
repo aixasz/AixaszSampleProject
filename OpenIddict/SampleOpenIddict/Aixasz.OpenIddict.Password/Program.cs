@@ -1,3 +1,4 @@
+using Aixasz.OpenIddict.Password.Endpoints;
 using Aixasz.OpenIddict.Password.Models;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
@@ -85,6 +86,25 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.AddAuthorizeEndpoint();
 
+await SeedTestAccountAsync(app.Services);
 
-app.Run();
+async Task SeedTestAccountAsync(IServiceProvider serviceProvider)
+{
+    using var scope =  serviceProvider.CreateScope();
+
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+    var user = await userManager.FindByNameAsync("tester");
+    if (user is null)
+    {
+        user = new IdentityUser
+        {
+            UserName = "tester",
+        };
+
+        await userManager.CreateAsync(user, "P@ssw0rd!");
+    }
+}
+
+await app.RunAsync();
