@@ -3,6 +3,7 @@ using Aixasz.OpenIddict.Password.Models;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
@@ -13,6 +14,17 @@ using System.Security.Claims;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+{
+    // Configure Entity Framework Core to use Microsoft Sqlite.
+    options.UseInMemoryDatabase("OpenIddictPasswordFlow");
+
+    // Register the entity sets needed by OpenIddict.
+    // Note: use the generic overload if you need to replace the default OpenIddict entities.
+    options.UseOpenIddict();
+});
+
 
 // Add services to the container.
 // Register the Identity services.
@@ -31,7 +43,8 @@ builder.Services.AddOpenIddict()
     {
         options.SetTokenEndpointUris("/connect/token");
 
-        options.AllowPasswordFlow();
+        options.AllowPasswordFlow()
+               .AllowRefreshTokenFlow();
 
         options.AcceptAnonymousClients();
 
@@ -92,15 +105,15 @@ await SeedTestAccountAsync(app.Services);
 
 async Task SeedTestAccountAsync(IServiceProvider serviceProvider)
 {
-    using var scope =  serviceProvider.CreateScope();
+    using var scope = serviceProvider.CreateScope();
 
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
-    var user = await userManager.FindByNameAsync("tester");
+    var user = await userManager.FindByNameAsync("devrock");
     if (user is null)
     {
         user = new IdentityUser
         {
-            UserName = "tester",
+            UserName = "devrock",
         };
 
         await userManager.CreateAsync(user, "P@ssw0rd!");

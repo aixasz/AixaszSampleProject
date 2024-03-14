@@ -20,9 +20,9 @@ public static class AuthorizeEndpoint
             if (request.IsPasswordGrantType())
             {
                 var authenticationSchemes = new List<string>
-        {
-            OpenIddictServerAspNetCoreDefaults.AuthenticationScheme
-        };
+                {
+                    OpenIddictServerAspNetCoreDefaults.AuthenticationScheme
+                };
                 var user = await userManager.FindByNameAsync(request.Username);
                 if (user == null)
                 {
@@ -66,12 +66,21 @@ public static class AuthorizeEndpoint
                 Scopes.OpenId,
                 Scopes.Email,
                 Scopes.Profile,
-                Scopes.Roles
+                Scopes.Roles,
+                Scopes.OfflineAccess,
             }.Intersect(request.GetScopes()));
 
                 identity.SetDestinations(GetDestinations);
 
                 return Results.SignIn(new ClaimsPrincipal(identity), null, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+            }
+            else if (request.IsRefreshTokenGrantType())
+            {
+                var claimsPrincipal = (await context.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme)).Principal;
+                if (claimsPrincipal is not null)
+                {
+                    return Results.SignIn(claimsPrincipal, null, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+                }
             }
 
             throw new NotImplementedException("The specified grant type is not implemented.");
